@@ -34,16 +34,16 @@ export async function POST(req) {
 
         // Extract Price from different classes
         const priceWhole = $('.a-price-whole').text().trim();
-        const priceFraction = $('.a-price-fraction').text().trim();
-        const priceSymbol = $('.a-price-symbol').text().trim();
         const priceToPay = $('.priceToPay').text().trim();
+        const savingsPercentage = $('.savingsPercentage').text().trim()
+
+        product.savingsPercentage = [...new Set(savingsPercentage.match(/-?\d+%/g))].join(' ')
 
         // Determine which price to use
         if (priceToPay) {
-            product.price = priceToPay;
+            product.price = validateAndCleanCurrency([...new Set(priceToPay.split(' '))].join(' '));
         } else {
-            product.price = priceSymbol + priceWhole + (priceFraction ? '.' + priceFraction : '');
-            product.price = validateAndCleanCurrency(product.price)
+            product.price = validateAndCleanCurrency([...new Set(priceWhole.split(' '))].join(' '));
         }
 
         // Extract Image

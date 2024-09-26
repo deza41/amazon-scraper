@@ -288,7 +288,7 @@ export default function WebScraper() {
                                             )}
                                         </div>
                                         <div className={listView ? "w-full" : ""}>
-                                            <h3 className={`text-lg font-semibold text-gray-800 mb-2 ${listView ? "w-fit" : "line-clamp-2"} `}>
+                                            <h3 className={`text-lg font-semibold text-gray-800 mb-2 ${listView ? "w-fit line-clamp-1" : "line-clamp-2"} `}>
                                                 {product.name}
                                             </h3>
                                             <div className={listView ? "flex gap-3" : ""}>
@@ -296,7 +296,7 @@ export default function WebScraper() {
                                                     <p className={`text-gray-700 mb-2 font-bold truncate ${listView ? "" : ""}`}>
                                                         Price:{" "}
                                                         <span className="font-medium text-gray-900">
-                                                            {product.price}
+                                                            <span class={"text-red-500"}>{product.savingsPercentage}</span> {product.price}
                                                         </span>
                                                     </p>
                                                 )}
