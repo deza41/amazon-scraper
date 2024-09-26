@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from "react"
-import { Search, Link, Package, X, Trash2, RefreshCw } from "lucide-react"
+import { Search, Trash2, RefreshCw } from "lucide-react"
 import StarRating from "./StarRating"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { motion, AnimatePresence } from "framer-motion"
 import { ListBulletIcon } from "@radix-ui/react-icons"
@@ -89,7 +89,7 @@ export default function WebScraper() {
 
             setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
-        } catch (err) {
+        } catch () {
             setError("An error occurred while scraping the website")
         } finally {
             setLoading(false)
@@ -151,7 +151,7 @@ export default function WebScraper() {
             setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
             setSelectedProduct({ ...refreshedProduct, updated: true })
-        } catch (err) {
+        } catch () {
             setError("An error occurred while refreshing the product")
         } finally {
             setLoading(false)
@@ -182,7 +182,7 @@ export default function WebScraper() {
 
             setProducts(refreshedProducts)
             localStorage.setItem('scrapedProducts', JSON.stringify(refreshedProducts))
-        } catch (err) {
+        } catch () {
             setError("An error occurred while refreshing all products")
         } finally {
             setLoading(false)
@@ -259,7 +259,7 @@ export default function WebScraper() {
 
                         <div className={`border-t border-gray-200 grid grid-cols-1 ${listView ? "p-2 gap-2" : "sm:grid-cols-2 lg:grid-cols-3 p-4 gap-6"}`}>
                             <AnimatePresence>
-                                {activeProducts?.map((product, index) => (
+                                {activeProducts?.map((product) => (
                                     <motion.div
                                         key={product.url}
                                         // initial={{ opacity: 0, y: 20 }}
