@@ -89,6 +89,7 @@ export default function WebScraper() {
 
             setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
+            setUrl("")
         } catch (err) {
             setError("An error occurred while scraping the website")
             console.log(err)
@@ -213,6 +214,7 @@ export default function WebScraper() {
                             onChange={(e) => setUrl(e.target.value)}
                             placeholder="Enter a URL to scrape..."
                             required
+                            disabled={loading}
                             className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
                         />
                         <div>
@@ -366,7 +368,7 @@ export default function WebScraper() {
                                 <p className="text-sm text-gray-700 font-bold px-4 py-2 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     Price:{" "}
                                     <span className="font-medium text-gray-900">
-                                        {selectedProduct.price}
+                                        <span class={"text-red-500"}>{selectedProduct.savingsPercentage}</span> {selectedProduct.price}
                                     </span>
                                 </p>
                             )}
