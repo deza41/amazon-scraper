@@ -23,7 +23,7 @@ export default function WebScraper() {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [listView, setListView] = useState(false)
     const modalRef = useRef(null)
-
+    
     useEffect(() => {
         const storedProducts = localStorage.getItem('scrapedProducts')
         if (storedProducts) {
