@@ -37,7 +37,7 @@ export async function POST(req) {
         const priceToPay = $('.priceToPay').text().trim();
         const savingsPercentage = $('.savingsPercentage').text().trim()
 
-        product.savingsPercentage = [...new Set(savingsPercentage.match(/-?\d+%/g))].join(' ')
+        product.savingsPercentage = [...new Set(savingsPercentage.match(/-?\d+%/g))][0]
 
         // Determine which price to use
         if (priceToPay) {
