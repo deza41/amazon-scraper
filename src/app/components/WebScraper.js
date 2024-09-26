@@ -296,7 +296,7 @@ export default function WebScraper() {
                                             <div className={listView ? "flex gap-3" : ""}>
                                                 {product.price && (
                                                     <p className={`text-gray-700 mb-2 font-bold truncate ${listView ? "" : ""}`}>
-                                                        Price:{" "}
+                                                        {listView ? "" : "Price"}
                                                         <span className="font-medium text-gray-900">
                                                             <span class={"text-red-500"}>{product.savingsPercentage}</span> {product.price}
                                                         </span>
