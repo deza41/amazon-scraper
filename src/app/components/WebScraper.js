@@ -322,7 +322,7 @@ export default function WebScraper() {
                                                     href={product.url}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="text-blue-600 hover:text-blue-500 w-fit h-fit"
+                                                    className={`text-blue-600 hover:text-blue-500 w-fit h-fit ${listView ? "text-xs sm:text-sm" : ""}`}
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     View Product
