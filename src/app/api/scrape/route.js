@@ -2,8 +2,6 @@ import { load } from 'cheerio';
 import axios from 'axios';
 import { NextResponse } from 'next/server';
 
-const SCRAPER_API_KEY = 'your_scraperapi_key';  // Replace with your ScraperAPI key
-
 // Array of User-Agents for rotation
 const userAgents = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
