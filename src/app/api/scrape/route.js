@@ -41,9 +41,9 @@ export async function POST(req) {
 
         // Determine which price to use
         if (priceToPay) {
-            product.price = validateAndCleanCurrency([...new Set(priceToPay.split(' '))].join(' '));
+            product.price = validateAndCleanCurrency([...new Set(priceToPay.split(' '))][0]);
         } else {
-            product.price = validateAndCleanCurrency([...new Set(priceWhole.split(' '))].join(' '));
+            product.price = validateAndCleanCurrency([...new Set(priceWhole.split(' '))][0]);
         }
 
         // Extract Image
