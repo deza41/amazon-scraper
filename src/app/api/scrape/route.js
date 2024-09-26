@@ -82,7 +82,8 @@ export async function POST(req) {
         const ratingMatch = ratingText.match(/(\d+(\.\d+)?) out of 5 stars/);
         if (ratingMatch) {
             product.rating = parseFloat(ratingMatch[1]);
-            product.totalReviews = $('#acrCustomerReviewText').text().trim();
+            product.totalReviews = [...new Set($('#acrCustomerReviewText').text().trim().match(/\d+\sratings/g))].join(' ');;
+
         } else {
             product.rating = null;
             product.totalReviews = null;
