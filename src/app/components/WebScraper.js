@@ -242,15 +242,15 @@ export default function WebScraper() {
                                 Scraped Products
                             </h2>
                         </div>
-                        <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+                        <div className={`px-4 py-5 sm:px-6 justify-between items-center flex flex-wrap gap-3`}>
                             <input
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search..."
                                 required
-                                className="text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none bg-white border rounded-full border-gray-300 w-64"
+                                className="text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none bg-white border rounded-full border-gray-300 w-40 sm:max-w-64"
                             />
-                            <div className="flex gap-1">
+                            <div className="flex flex-wrap gap-1">
                                 <Button onClick={refreshAllProducts} disabled={loading}>
                                     <RefreshCw className="mr-2 h-4 w-4" />
                                     Refresh All
