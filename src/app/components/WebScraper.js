@@ -89,8 +89,9 @@ export default function WebScraper() {
 
             setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
-        } catch () {
+        } catch (err) {
             setError("An error occurred while scraping the website")
+            console.log(err)
         } finally {
             setLoading(false)
         }
@@ -151,8 +152,9 @@ export default function WebScraper() {
             setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
             setSelectedProduct({ ...refreshedProduct, updated: true })
-        } catch () {
+        } catch (err) {
             setError("An error occurred while refreshing the product")
+            console.log(err)
         } finally {
             setLoading(false)
         }
@@ -182,8 +184,9 @@ export default function WebScraper() {
 
             setProducts(refreshedProducts)
             localStorage.setItem('scrapedProducts', JSON.stringify(refreshedProducts))
-        } catch () {
+        } catch (err) {
             setError("An error occurred while refreshing all products")
+            console.log(err)
         } finally {
             setLoading(false)
         }
