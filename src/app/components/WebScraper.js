@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from "react"
-import { Search, Trash2, RefreshCw } from "lucide-react"
+import { Search, Trash2, RefreshCw, Link } from "lucide-react"
 import StarRating from "./StarRating"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { ListBulletIcon } from "@radix-ui/react-icons"
 import Amazon from '../../public/amazon.svg';
 import Image from "next/image";
+import DraggableModal from "./draggableModal"
 
 export default function WebScraper() {
     const [url, setUrl] = useState("")
@@ -22,6 +23,7 @@ export default function WebScraper() {
     const [error, setError] = useState("")
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
     const [listView, setListView] = useState(false)
+    const [isUrlModalOpen, setIsUrlModalOpen] = useState(false)
     const modalRef = useRef(null)
     
     useEffect(() => {
@@ -217,10 +219,17 @@ export default function WebScraper() {
                             disabled={loading}
                             className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
                         />
-                        <div>
-                            <Button type="submit" disabled={loading}>
-                                <Search className="mr-2 h-4 w-4" />
+                       <div className="flex">
+                            <Button type="submit" disabled={loading} className="rounded-r-none">
+                                <Search className="h-4 w-4" />
                                 {loading ? "Scraping..." : "Scrape"}
+                            </Button>
+                            <Button 
+                                type="button" 
+                                onClick={() => setIsUrlModalOpen(true)}
+                                className="rounded-r-md rounded-l-none bg-gray-700 p-1"
+                            >
+                                <Link className="h-4 w-4" />
                             </Button>
                         </div>
                     </div>
@@ -462,6 +471,11 @@ export default function WebScraper() {
                     </DialogContent>
                 </Dialog>
             </div>
+            <DraggableModal 
+                    isOpen={isUrlModalOpen} 
+                    onClose={() => setIsUrlModalOpen(false)} 
+                    initialUrl={"https://www.amazon.com.au/"} 
+                />
         </div>
     )
 }
