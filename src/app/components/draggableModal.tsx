@@ -78,10 +78,8 @@ export default function DraggableModal({ isOpen, onClose, initialUrl }: Draggabl
       exit={{ opacity: 0, scale: 0.8 }}
       className="fixed z-50 bg-white rounded-lg overflow-hidden shadow-2xl"
       style={{
-        width: `70vw`,
-        height: `90vh`,
-        // width: `${size.width}px`,
-        // height: `${size.height}px`,
+        width: `${size.width}px`,
+        height: `${size.height}px`,
         top: '10%',
         left: '50%',
         transform: 'translateX(-50%)',
