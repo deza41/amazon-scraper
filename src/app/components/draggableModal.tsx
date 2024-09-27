@@ -100,7 +100,7 @@ export default function DraggableModal({ isOpen, onClose, initialUrl }: Draggabl
             title="Amazon Website"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             onLoad={(e) => {
-              var iframe = e.target as HTMLIFrameElement
+              const iframe = e.target as HTMLIFrameElement
               setCurrentUrl(iframe.contentWindow?.location?.href || initialUrl)
             }}
           />
