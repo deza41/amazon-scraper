@@ -35,7 +35,7 @@
     "src/app/api/dashboard-proxy/route.js",
     "src/app/api/http-proxy/route.js",
     "src/app/api/scrape/route.js"
-  ],
+, "src/app/components/draggableModal.jsx"  ],
   "exclude": [
     "node_modules"
   ]
