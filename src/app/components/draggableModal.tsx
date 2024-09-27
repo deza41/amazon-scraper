@@ -21,7 +21,7 @@ export default function DraggableModal({ isOpen, onClose, initialUrl }: Draggabl
 
   useEffect(() => {
     const handleResize = (e: MouseEvent) => {
-      setSize(prevSize => ({
+      setSize(() => ({
         width: Math.max(300, e.clientX - dragRef.current!.getBoundingClientRect().left),
         height: Math.max(200, e.clientY - dragRef.current!.getBoundingClientRect().top)
       }))
