@@ -74,7 +74,7 @@ export default function DraggableModal({ isOpen, onClose, initialUrl }) {
             title="Amazon Website"
             sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
             target="_top"
-            onLoad={setCurrentUrl(initialUrl)}
+            onLoad={() => setCurrentUrl(initialUrl)}
           />
         </div>
         <div className="p-4 border-t bg-gray-100">
