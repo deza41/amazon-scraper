@@ -25,12 +25,31 @@ export default function WebScraper() {
     const [listView, setListView] = useState(false)
     const [isUrlModalOpen, setIsUrlModalOpen] = useState(false)
     const modalRef = useRef(null)
-    
+
     useEffect(() => {
-        const storedProducts = localStorage.getItem('scrapedProducts')
-        if (storedProducts) {
-            setProducts(JSON.parse(storedProducts))
+
+        async function getData() {
+            try {
+                const response = await fetch('/api/scrape'); // Replace with your API endpoint
+                if (response.ok) {
+                    const data = await response.json();
+                    setProducts(data?.products); // Adjust based on your API response structure
+                    console.log(data?.products)
+                } else {
+                    throw new Error('Failed to fetch products'); // Handle non-200 responses
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error); // Log the error or set an error state
+                setError('An error occurred while fetching products, loading local data...'); // Set error state to display to the user
+                const storedProducts = localStorage.getItem('scrapedProducts')
+                if (storedProducts) {
+                    setProducts(JSON.parse(storedProducts))
+                }
+            }
         }
+        getData()
+
+
     }, [])
 
     useEffect(() => {
@@ -81,15 +100,15 @@ export default function WebScraper() {
 
             const existingProductIndex = products.findIndex(p => p.url === product.url)
 
-            let updatedProductsList
-            if (existingProductIndex !== -1) {
-                updatedProductsList = [...products]
-                updatedProductsList[existingProductIndex] = { ...product, updated: true }
-            } else {
-                updatedProductsList = [...products, { ...product, updated: true }]
-            }
+            // let updatedProductsList
+            // if (existingProductIndex !== -1) {
+            //     updatedProductsList = [...products]
+            //     updatedProductsList[existingProductIndex] = { ...product, updated: true }
+            // } else {
+            //     updatedProductsList = [...products, { ...product, updated: true }]
+            // }
 
-            setProducts(updatedProductsList)
+            setProducts(existingProductIndex)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
             setUrl("")
         } catch (err) {
@@ -100,13 +119,15 @@ export default function WebScraper() {
         }
     }
 
-    const handleProductClick = (product) => {
+    const handleProductClick = async (product) => {
         const existingProductIndex = products.findIndex(p => p.url === product.url)
         if (existingProductIndex !== -1) {
             let updatedProductsList = [...products]
             updatedProductsList[existingProductIndex].updated = false
             setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
+            // Call the function to mark the product as updated in the backend
+            await markProductAsUpdated(product.url, false);
         }
         setSelectedProduct(product)
     }
@@ -120,16 +141,59 @@ export default function WebScraper() {
         setIsDeleteDialogOpen(true)
     }
 
-    const deleteProduct = () => {
+    const deleteProduct = async () => {
         if (productToDelete) {
-            const updatedProductsList = products.filter(product => product.url !== productToDelete.url)
-            setProducts(updatedProductsList)
-            localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
-            setIsDeleteDialogOpen(false)
-            setProductToDelete(null)
-            closeModal()
+            try {
+                const response = await fetch('/api/scrape', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: productToDelete.url }), // Send the URL to delete
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete product');
+                }
+
+                // Update the product list after deletion
+                const updatedProductsList = products.filter(product => product.url !== productToDelete.url);
+                setProducts(updatedProductsList);
+                localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList));
+                setIsDeleteDialogOpen(false);
+                setProductToDelete(null);
+                closeModal();
+            } catch (err) {
+                console.error('Error deleting product:', err);
+                setError('An error occurred while deleting the product');
+            }
         }
-    }
+    };
+
+    const markProductAsUpdated = async (url, type) => {
+        try {
+            const response = await fetch('/api/scrape/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ url, type }), // Send the URL to update
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update product status');
+            }
+
+            const data = await response.json();
+            console.log(data.message); // Optional: log the response message
+        } catch (err) {
+            console.error('Error updating product status:', err);
+            setError('An error occurred while updating the product status');
+        }
+    };
+
+
+
 
     const refreshProduct = async (product) => {
         setLoading(true)
@@ -155,6 +219,10 @@ export default function WebScraper() {
             setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
             setSelectedProduct({ ...refreshedProduct, updated: true })
+
+            // Call the function to mark the product as updated in the backend
+            await markProductAsUpdated(refreshedProduct.url, true);
+
         } catch (err) {
             setError("An error occurred while refreshing the product")
             console.log(err)
@@ -219,13 +287,13 @@ export default function WebScraper() {
                             disabled={loading}
                             className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
                         />
-                       <div className="flex">
+                        <div className="flex">
                             <Button type="submit" disabled={loading} className="rounded-r-none">
                                 <Search className="h-4 w-4" />
                                 {loading ? "Scraping..." : "Scrape"}
                             </Button>
-                            <Button 
-                                type="button" 
+                            <Button
+                                type="button"
                                 onClick={() => setIsUrlModalOpen(!isUrlModalOpen)}
                                 className="rounded-r-md rounded-l-none bg-gray-700 p-1"
                             >
@@ -471,11 +539,11 @@ export default function WebScraper() {
                     </DialogContent>
                 </Dialog>
             </div>
-            <DraggableModal 
-                    isOpen={isUrlModalOpen} 
-                    onClose={() => setIsUrlModalOpen(false)} 
-                    initialUrl={"https://www.amazon.com.au/"} 
-                />
+            <DraggableModal
+                isOpen={isUrlModalOpen}
+                onClose={() => setIsUrlModalOpen(false)}
+                initialUrl={"https://www.amazon.com.au/"}
+            />
         </div>
     )
 }

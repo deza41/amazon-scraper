@@ -1,6 +1,7 @@
 import { load } from 'cheerio';
 import axios from 'axios';
 import { NextResponse } from 'next/server';
+import { kv } from "@vercel/kv";
 
 // Array of User-Agents for rotation
 const userAgents = [
@@ -115,9 +116,48 @@ export async function POST(req) {
             product.totalReviews = null;
         }
 
+        product.updated = true
+
+        // Store the product data in the KV store
+        const kvKey = `product:${url}`; // Use the product URL as a key
+        await kv.set(kvKey, product);
+
         return NextResponse.json({ product }, { status: 200 });
     } catch (error) {
         console.error('Scraping error:', error);
         return NextResponse.json({ error: 'An error occurred while scraping the website' }, { status: 500 });
     }
 }
+
+export async function GET() {
+    try {
+        // Fetch all keys that start with 'product:'
+        const keys = await kv.keys('product:*');
+
+        // Retrieve product details for each key
+        const products = await Promise.all(keys.map(async (key) => {
+            const product = await kv.get(key);
+            return product;
+        }));
+
+        return NextResponse.json({ products }, { status: 200 });
+    } catch (error) {
+        console.error('Error fetching product list:', error);
+        return NextResponse.json({ error: 'An error occurred while fetching the product list' }, { status: 500 });
+    }
+}
+
+export async function DELETE(req) {
+    try {
+        const { url } = await req.json(); // Get the URL from the request body
+
+        // Delete the product from KV store
+        await kv.del(`product:${url}`); // Assuming you're storing products with a key pattern like `product:<url>`
+
+        return NextResponse.json({ message: 'Product deleted successfully' }, { status: 200 });
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        return NextResponse.json({ error: 'An error occurred while deleting the product' }, { status: 500 });
+    }
+}
+
