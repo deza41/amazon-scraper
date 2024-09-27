@@ -226,10 +226,10 @@ export default function WebScraper() {
                             </Button>
                             <Button 
                                 type="button" 
-                                onClick={() => setIsUrlModalOpen(true)}
+                                onClick={() => setIsUrlModalOpen(!isUrlModalOpen)}
                                 className="rounded-r-md rounded-l-none bg-gray-700 p-1"
                             >
-                                <Link className="h-4 w-4" />
+                                <Link className={`h-4 w-4 ${isUrlModalOpen && "text-blue-300"}`} />
                             </Button>
                         </div>
                     </div>

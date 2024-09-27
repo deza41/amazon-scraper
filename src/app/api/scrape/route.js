@@ -17,8 +17,13 @@ function getRandomUserAgent() {
 }
 
 function validateAndCleanCurrency(input) {
-    const cleanInput = input.replace(/\.$/, '').replace(/(\..*)\./, '$1');
-    const regex = /^\$[0-9]+(\.[0-9]+)?$/;
+    // Remove commas from the input
+    const cleanInput = input.replace(/,/g, '')
+        .replace(/\.$/, '') // Remove trailing decimal point
+        .replace(/(\..*)\./, '$1'); // Keep only the first decimal
+
+    // Updated regex to validate the cleaned input
+    const regex = /^\$[0-9]+(\.[0-9]{2})?$/;
     return regex.test(cleanInput) ? cleanInput : "None";
 }
 
