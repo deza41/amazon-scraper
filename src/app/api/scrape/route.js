@@ -31,7 +31,7 @@ export async function POST(req) {
         const { url } = await req.json();
 
         // Introduce random delay (1-3 seconds)
-        await delay(Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000);
+        // await delay(Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000);
 
         // Get a random User-Agent for each request
         const userAgent = getRandomUserAgent();
