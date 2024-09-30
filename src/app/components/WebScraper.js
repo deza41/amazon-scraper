@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, Suspense } from "react"
 import { Search, Trash2, RefreshCw, Link } from "lucide-react"
 import StarRating from "./StarRating"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { ListBulletIcon } from "@radix-ui/react-icons"
 import Amazon from '../../public/amazon.svg';
 import Image from "next/image";
 import DraggableModal from "./draggableModal"
+import LoadingSpinner from "./LoadingSpinner"
 
 export default function WebScraper() {
     const [url, setUrl] = useState("")
@@ -30,6 +31,7 @@ export default function WebScraper() {
 
         async function getData() {
             try {
+                setLoading(true)
                 const response = await fetch('/api/scrape'); // Replace with your API endpoint
                 if (response.ok) {
                     const data = await response.json();
@@ -46,6 +48,9 @@ export default function WebScraper() {
                     setProducts(JSON.parse(storedProducts))
                 }
             }
+            finally {
+                setLoading(false)
+            }
         }
         getData()
 
@@ -54,7 +59,7 @@ export default function WebScraper() {
 
     useEffect(() => {
         // Filter products based on the search term
-        const filteredProducts = products.filter(product => {
+        const filteredProducts = products?.filter(product => {
             // Assuming product has a name or description property to search
             return Object.values(product).some(value =>
                 String(value).toLowerCase().includes(search.toLowerCase())
@@ -97,18 +102,19 @@ export default function WebScraper() {
             }
 
             const { product } = await response.json()
+            debugger;
 
             const existingProductIndex = products.findIndex(p => p.url === product.url)
 
-            // let updatedProductsList
-            // if (existingProductIndex !== -1) {
-            //     updatedProductsList = [...products]
-            //     updatedProductsList[existingProductIndex] = { ...product, updated: true }
-            // } else {
-            //     updatedProductsList = [...products, { ...product, updated: true }]
-            // }
+            let updatedProductsList
+            if (existingProductIndex !== -1) {
+                updatedProductsList = [...products]
+                updatedProductsList[existingProductIndex] = { ...product }
+            } else {
+                updatedProductsList = [...products, { ...product }]
+            }
 
-            setProducts(existingProductIndex)
+            setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
             setUrl("")
         } catch (err) {
@@ -121,13 +127,15 @@ export default function WebScraper() {
 
     const handleProductClick = async (product) => {
         const existingProductIndex = products.findIndex(p => p.url === product.url)
+        if (products[existingProductIndex].updated) {
+            markProductAsUpdated(product.url, false)
+        }
         if (existingProductIndex !== -1) {
             let updatedProductsList = [...products]
             updatedProductsList[existingProductIndex].updated = false
             setProducts(updatedProductsList)
             localStorage.setItem('scrapedProducts', JSON.stringify(updatedProductsList))
             // Call the function to mark the product as updated in the backend
-            await markProductAsUpdated(product.url, false);
         }
         setSelectedProduct(product)
     }
@@ -341,80 +349,106 @@ export default function WebScraper() {
 
                         <div className={`border-t border-gray-200 grid grid-cols-1 ${listView ? "p-2 gap-2" : "sm:grid-cols-2 lg:grid-cols-3 p-4 gap-6"}`}>
                             <AnimatePresence>
-                                {activeProducts?.map((product) => (
-                                    <motion.div
-                                        key={product.url}
-                                        // initial={{ opacity: 0, y: 20 }}
-                                        // animate={{ opacity: 1, y: 0 }}
-                                        // exit={{ opacity: 0, y: -20 }}
-                                        // transition={{ duration: 0.3 }}
-                                        className={`group bg-white border border-gray-200 rounded-lg shadow-md  cursor-pointer transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg ${product.updated ? 'ring-2 ring-blue-500' : ''} ${listView ? "w-full flex p-2 gap-2" : "p-4"}`}
-                                        onClick={() => handleProductClick(product)}
-                                    >
-                                        <div className={`flex mb-4 rounded-lg ${listView ? "" : "justify-center"}`}>
-                                            {product.image ? (
-                                                <div className={`${listView ? "h-14 w-14" : "h-48"} overflow-hidden`}>
-                                                    <img
-                                                        src={product.image}
-                                                        alt={product.name}
-                                                        className="w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="bg-gray-200 h-48 w-full flex items-center justify-center text-gray-500">
-                                                    No Image
+                                <Suspense fallback={<LoadingSpinner />}>
+                                    {loading ? (
+                                        <div className="col-span-4"><LoadingSpinner /></div>
+                                    ) : (
+                                        <>
+                                            {error && (
+                                                <div
+                                                    className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
+                                                    role="alert"
+                                                >
+                                                    <span className="block sm:inline">{error}</span>
                                                 </div>
                                             )}
-                                        </div>
-                                        <div className={listView ? "w-full" : ""}>
-                                            <h3 className={`text-lg font-semibold text-gray-800 mb-2 ${listView ? "w-fit line-clamp-1" : "line-clamp-2"} `}>
-                                                {product.name}
-                                            </h3>
-                                            <div className={listView ? "flex gap-3" : ""}>
-                                                {product.price && (
-                                                    <p className={`text-gray-700 mb-2 font-bold truncate ${listView ? "" : ""}`}>
-                                                        {listView ? "" : "Price "}
-                                                        <span className="font-medium text-gray-900">
-                                                            <span class={"text-red-500"}>{product.savingsPercentage}</span> {product.price}
-                                                        </span>
-                                                    </p>
-                                                )}
 
-                                                {product.rating && (
-                                                    <p className={`flex gap-2 text-gray-700 mb-2 font-bold ${listView ? "" : ""} `}>
-                                                        {listView ? "" : "Rating "}
-                                                        <span className="font-medium text-gray-900">
-                                                            <StarRating rating={product.rating} />
-                                                        </span>
-                                                    </p>
-                                                )}
-                                            </div>
+                                            {activeProducts.length > 0 ? (
+                                                <>
+                                                    {activeProducts?.map((product) => (
+                                                        <motion.div
+                                                            key={product.url}
+                                                            // initial={{ opacity: 0, y: 20 }}
+                                                            // animate={{ opacity: 1, y: 0 }}
+                                                            // exit={{ opacity: 0, y: -20 }}
+                                                            // transition={{ duration: 0.3 }}
+                                                            className={`group bg-white border border-gray-200 rounded-lg shadow-md  cursor-pointer transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg ${product.updated ? 'ring-2 ring-blue-500' : ''} ${listView ? "w-full flex p-2 gap-2" : "p-4"}`}
+                                                            onClick={() => handleProductClick(product)}
+                                                        >
+                                                            <div className={`flex mb-4 rounded-lg ${listView ? "" : "justify-center"}`}>
+                                                                {product.image ? (
+                                                                    <div className={`${listView ? "h-14 w-14" : "h-48"} overflow-hidden`}>
+                                                                        <img
+                                                                            src={product.image}
+                                                                            alt={product.name}
+                                                                            className="w-full h-full object-contain transition-transform duration-300 ease-in-out transform group-hover:scale-110"
+                                                                        />
+                                                                    </div>
+                                                                ) : (
+                                                                    <div className="bg-gray-200 h-48 w-full flex items-center justify-center text-gray-500">
+                                                                        No Image
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className={listView ? "w-full" : ""}>
+                                                                <h3 className={`text-lg font-semibold text-gray-800 mb-2 ${listView ? "w-fit line-clamp-1" : "line-clamp-2"} `}>
+                                                                    {product.name}
+                                                                </h3>
+                                                                <div className={listView ? "flex gap-3" : ""}>
+                                                                    {product.price && (
+                                                                        <p className={`text-gray-700 mb-2 font-bold truncate ${listView ? "" : ""}`}>
+                                                                            {listView ? "" : "Price "}
+                                                                            <span className="font-medium text-gray-900">
+                                                                                <span class={"text-red-500"}>{product.savingsPercentage}</span> {product.price}
+                                                                            </span>
+                                                                        </p>
+                                                                    )}
 
-                                        </div>
+                                                                    {product.rating && (
+                                                                        <p className={`flex gap-2 text-gray-700 mb-2 font-bold ${listView ? "" : ""} `}>
+                                                                            {listView ? "" : "Rating "}
+                                                                            <span className="font-medium text-gray-900">
+                                                                                <StarRating rating={product.rating} />
+                                                                            </span>
+                                                                        </p>
+                                                                    )}
+                                                                </div>
+
+                                                            </div>
 
 
-                                        {product.url && (
-                                            <div className={` ${listView ? "flex flex-col w-32 justify-end items-end" : ""}`}>
-                                                <a
-                                                    href={product.url}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className={`text-blue-600 hover:text-blue-500 w-fit h-fit ${listView ? "text-xs sm:text-sm" : ""}`}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    View Product
-                                                </a>
-                                            </div>
+                                                            {product.url && (
+                                                                <div className={` ${listView ? "flex flex-col w-32 justify-end items-end" : ""}`}>
+                                                                    <a
+                                                                        href={product.url}
+                                                                        target="_blank"
+                                                                        rel="noopener noreferrer"
+                                                                        className={`text-blue-600 hover:text-blue-500 w-fit h-fit ${listView ? "text-xs sm:text-sm" : ""}`}
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    >
+                                                                        View Product
+                                                                    </a>
+                                                                </div>
 
-                                        )}
+                                                            )}
 
-                                        {product.updated && (
-                                            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
-                                                Updated
-                                            </div>
-                                        )}
-                                    </motion.div>
-                                ))}
+                                                            {product.updated && (
+                                                                <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow">
+                                                                    Updated
+                                                                </div>
+                                                            )}
+                                                        </motion.div>
+                                                    ))}
+                                                </>
+                                            ) : (
+                                                <div className="col-span-full text-center text-gray-500 py-8">
+                                                    No products found.
+                                                </div>
+                                            )}
+
+                                        </>
+                                    )}
+                                </Suspense>
                             </AnimatePresence>
                         </div>
 
