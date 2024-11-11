@@ -566,7 +566,7 @@ export default function WebScraper() {
                             )}
                         </div>
                         <DialogFooter>
-                            <div className="flex justify-between w-full">
+                            <div className="flex justify-between w-full items-end">
                                 <Button onClick={() => refreshProduct(selectedProduct)} disabled={loading}>
                                     <RefreshCw className="mr-2 h-4 w-4" />
                                     Refresh
