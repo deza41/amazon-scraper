@@ -240,36 +240,61 @@ export default function WebScraper() {
     }
 
     const refreshAllProducts = async () => {
-        setLoading(true)
-        setError("")
+        setLoading(true);
+        setError("");
+
+        const concurrentFetches = 5; // Number of parallel fetches
+        const queue = [...products];
+        const refreshedProducts = [];
+        const activeFetches = [];
+
+        const fetchProduct = async (product) => {
+            try {
+                const response = await fetch("/api/scrape", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ url: product.url }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to refresh product: ${product.url}`);
+                }
+
+                const { product: refreshedProduct } = await response.json();
+                return { ...refreshedProduct, updated: true };
+            } catch (error) {
+                console.error(`Error refreshing product ${product.url}:`, error);
+                return { ...product, updated: false, error: error.message };
+            }
+        };
+
+        const processQueue = async () => {
+            if (queue.length === 0 && activeFetches.length === 0) {
+                setProducts(refreshedProducts);
+                localStorage.setItem('scrapedProducts', JSON.stringify(refreshedProducts));
+                setLoading(false);
+                return;
+            }
+
+            while (activeFetches.length < concurrentFetches && queue.length > 0) {
+                const product = queue.shift();
+                const fetchPromise = fetchProduct(product).then((result) => {
+                    refreshedProducts.push(result);
+                    activeFetches.splice(activeFetches.indexOf(fetchPromise), 1);
+                    processQueue();
+                });
+                activeFetches.push(fetchPromise);
+            }
+        };
 
         try {
-            const refreshedProducts = await Promise.all(
-                products.map(async (product) => {
-                    const response = await fetch("/api/scrape", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ url: product.url })
-                    })
-
-                    if (!response.ok) {
-                        throw new Error(`Failed to refresh product: ${product.url}`)
-                    }
-
-                    const { product: refreshedProduct } = await response.json()
-                    return { ...refreshedProduct, updated: true }
-                })
-            )
-
-            setProducts(refreshedProducts)
-            localStorage.setItem('scrapedProducts', JSON.stringify(refreshedProducts))
+            await processQueue();
         } catch (err) {
-            setError("An error occurred while refreshing all products")
-            console.log(err)
-        } finally {
-            setLoading(false)
+            setError("An error occurred while refreshing products");
+            console.error(err);
+            setLoading(false);
         }
-    }
+    };
 
     return (
         <div className="min-h-screen bg-gray-100 p-4 sm:px-6 lg:px-8">
